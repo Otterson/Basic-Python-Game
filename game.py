@@ -11,6 +11,8 @@ screen_height = 900
 player_x_pos = 400
 player_y_pos = 800
 
+player = [player_x_pos, player_y_pos]
+
 block_size = 50
 
 enemy_x_pos = random.randint(0,screen_width-block_size)
@@ -36,10 +38,11 @@ score = 0
 
 def drop_enemies(enemy_list):
     delay = random.random()
-    if len(enemy_list) <10 and delay < 0.2:
+    if len(enemy_list) <15 and delay < 0.1:
         x_pos = random.randint(0, screen_width - block_size)
-        y_pos = 0
-        enemy_list.append((x_pos,y_pos))
+        y_pos = 1
+        enemy_list.append([x_pos,y_pos])
+    print(enemy_list)
 
 def draw_enemies(enemy_list):
     for enemy_pos in enemy_list:
@@ -57,23 +60,21 @@ def update_enemy_positions(enemy_list, score):
 
 def collision_check(enemy_list ,player_pos):
     for enemy_pos in enemy_list:
-        if detect_collision( player_pos, enemy_pos):
+        if detect_collision(enemy_pos, player_pos):
             return True
     return False
 
 
 def detect_collision(player_position, enemy_position):
     p_x = player_position[0]
-    p_y = enemy_position[1]
+    p_y = player_position[1]
 
     e_x = enemy_position[0]
     e_y = enemy_position[1]
 
-    #check horizontal collision
-    if (e_x >= p_x and e_x < (p_x + block_size)) or (p_x >= e_x and p_x < (e_x + block_size)):
-        if (e_y >= p_y and e_y < (p_y + block_size)) or (p_y >= e_y and p_y < (e_y + block_size)):
+    if (e_x >= p_x and e_x < (p_x + block_size)) or (p_x >= e_x and p_x < (e_x+block_size)):
+        if (e_y >= p_y and e_y < (p_y + block_size)) or (p_y >= e_y and p_y < (e_y+block_size)):
             return True
-
     return False
 
 
@@ -104,16 +105,9 @@ while not game_over:
                 player_y_pos -= 40
             elif event.key == pygame.K_DOWN:
                 player_y_pos += 40
-
+            player = [player_x_pos, player_y_pos]
 
     screen.fill(BLACK)
-
-    #Update enemy position
-    # if enemy_y_pos > 0 and enemy_y_pos < screen_height:
-    #     enemy_y_pos += enemy_block_speed
-    # else:
-    #     enemy_x_pos = random.randint(0,screen_width - block_size)
-    #     enemy_y_pos = 1
 
     drop_enemies(enemy_list)
     score = update_enemy_positions(enemy_list,score)
@@ -123,12 +117,13 @@ while not game_over:
     label = myFont.render(text, 1, YELLOW)
     screen.blit(label, (screen_width-200, screen_height-40))
 
-    if collision_check(enemy_list, [player_x_pos, player_y_pos]):
+    if collision_check(enemy_list, player):
+        print("game over")
         game_over = True
         break
 
     draw_enemies(enemy_list)
-    pygame.draw.rect(screen, BLUE, (player_x_pos,player_y_pos,block_size,block_size))
+    pygame.draw.rect(screen, BLUE, (player[0],player[1],block_size,block_size))
 
     clock.tick(20)
     pygame.display.update()
